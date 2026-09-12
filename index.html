@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rojgar Sahayak - UP 75 Jile</title>
+<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiUm9qZ2FyIFNhaGF5YWsiLCJzaG9ydF9uYW1lIjoiUm9qZ2FyIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiI2ZmZmZmZiIsInRoZW1lX2NvbG9yIjoiIzE2YTg1NSJ9">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui}
+body{background:#f0fdf4}
+.header{background:#16a34a;color:white;padding:15px;text-align:center;position:sticky;top:0;z-index:10}
+.header h1{font-size:22px}
+.header p{font-size:13px;opacity:.9;margin-top:4px}
+.searchBox{padding:12px;background:white;position:sticky;top:68px;z-index:9;box-shadow:0 2px 5px rgba(0,0,0,.1)}
+.searchBox input{width:100%;padding:12px;border:2px solid #16a34a;border-radius:10px;font-size:15px}
+.filters{display:flex;gap:8px;overflow-x:auto;padding:10px;background:white}
+.filters button{white-space:nowrap;padding:8px 14px;border-radius:20px;border:1px solid #16a34a;background:white;color:#16a34a}
+.filters button.active{background:#16a34a;color:white}
+.card{background:white;margin:10px;border-radius:12px;padding:12px;box-shadow:0 2px 6px rgba(0,0,0,.1)}
+.card-top{display:flex;justify-content:space-between}
+.card h3{font-size:16px;color:#14532d}
+.badge{background:#dcfce7;color:#166534;padding:3px 8px;border-radius:10px;font-size:11px}
+.card p{font-size:13px;color:#555;margin-top:4px}
+.btns{display:flex;gap:8px;margin-top:10px}
+.call{background:#16a34a;color:white;border:none;padding:10px;flex:1;border-radius:8px;font-weight:bold}
+.wa{background:#25D366;color:white;border:none;padding:10px;flex:1;border-radius:8px;font-weight:bold}
+.addBtn{position:fixed;bottom:20px;right:20px;background:#16a34a;color:white;width:56px;height:56px;border-radius:50%;border:none;font-size:28px;box-shadow:0 4px 10px rgba(0,0,0,.3)}
+#formDiv{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:20;align-items:center;justify-content:center;padding:20px}
+.form{background:white;padding:20px;border-radius:12px;width:100%;max-width:400px}
+.form input,.form select{width:100%;padding:10px;margin:6px 0;border:1px solid #ccc;border-radius:8px}
+.form button{width:100%;padding:12px;background:#16a34a;color:white;border:none;border-radius:8px;margin-top:8px;font-weight:bold}
+</style>
+</head>
+<body>
+<div class="header">
+<h1>Rojgar Sahayak</h1>
+<p>UP 75 Jile Labour Mistri Thekedar App</p>
+<p style="font-size:11px">Sahatwar | Ballia | Ghazipur | Mau | Azamgarh</p>
+</div>
+
+<div class="searchBox">
+<input id="search" placeholder="🔍 Naam, Kaam, Jila search karo..." oninput="render()">
+</div>
+
+<div class="filters" id="distFilter">
+<button class="active" onclick="setDist('All',this)">All</button>
+<button onclick="setDist('Sahatwar',this)">Sahatwar</button>
+<button onclick="setDist('Ballia',this)">Ballia</button>
+<button onclick="setDist('Ghazipur',this)">Ghazipur</button>
+<button onclick="setDist('Mau',this)">Mau</button>
+<button onclick="setDist('Azamgarh',this)">Azamgarh</button>
+</div>
+
+<div class="filters" id="catFilter">
+<button class="active" onclick="setCat('All',this)">All Kaam</button>
+<button onclick="setCat('Labour',this)">Labour</button>
+<button onclick="setCat('Mistri',this)">Mistri</button>
+<button onclick="setCat('Thekedar',this)">Thekedar</button>
+<button onclick="setCat('Electrician',this)">Electrician</button>
+<button onclick="setCat('Plumber',this)">Plumber</button>
+</div>
+
+<div id="list"></div>
+
+<button class="addBtn" onclick="document.getElementById('formDiv').style.display='flex'">+</button>
+
+<div id="formDiv">
+<div class="form">
+<h3>Naya Worker Jodo</h3>
+<input id="f_name" placeholder="Naam">
+<input id="f_phone" placeholder="Mobile Number" type="tel">
+<select id="f_dist"><option>Sahatwar</option><option>Ballia</option><option>Ghazipur</option><option>Mau</option><option>Azamgarh</option></select>
+<select id="f_cat"><option>Labour</option><option>Mistri</option><option>Thekedar</option><option>Electrician</option><option>Plumber</option></select>
+<input id="f_exp" placeholder="Anubhav (ex: 5 Saal)">
+<button onclick="addWorker()">Jodo</button>
+<button style="background:#ddd;color:#333" onclick="document.getElementById('formDiv').style.display='none'">Band Karo</button>
+</div>
+</div>
+
+<script>
+let workers = JSON.parse(localStorage.getItem('rs_workers')||'null') || [
+{name:"Ramesh Mistri",phone:"9198000001",dist:"Sahatwar",cat:"Mistri",exp:"10 Saal",rate:"4.8"},
+{name:"Suresh Labour",phone:"9198000002",dist:"Ballia",cat:"Labour",exp:"5 Saal",rate:"4.5"},
+{name:"Anil Thekedar",phone:"9198000003",dist:"Ghazipur",cat:"Thekedar",exp:"15 Saal",rate:"4.9"},
+{name:"Vikash Electrician",phone:"9198000004",dist:"Mau",cat:"Electrician",exp:"7 Saal",rate:"4.7"},
+{name:"Pappu Plumber",phone:"9198000005",dist:"Sahatwar",cat:"Plumber",exp:"6 Saal",rate:"4.6"},
+{name:"Sunil Labour Group",phone:"9198000006",dist:"Ballia",cat:"Labour",exp:"8 Saal - 10 Labour",rate:"4.4"}
+];
+let selDist='All', selCat='All';
+function setDist(d,el){selDist=d; document.querySelectorAll('#distFilter button').forEach(b=>b.classList.remove('active')); el.classList.add('active'); render();}
+function setCat(c,el){selCat=c; document.querySelectorAll('#catFilter button').forEach(b=>b.classList.remove('active')); el.classList.add('active'); render();}
+function render(){
+let q=document.getElementById('search').value.toLowerCase();
+let html='';
+workers.filter(w=>{
+let mDist = selDist==='All' || w.dist===selDist;
+let mCat = selCat==='All' || w.cat===selCat;
+let mQ = w.name.toLowerCase().includes(q) || w.cat.toLowerCase().includes(q) || w.dist.toLowerCase().includes(q);
+return mDist && mCat && mQ;
+}).forEach(w=>{
+html+=`<div class="card"><div class="card-top"><h3>${w.name}</h3><span class="badge">${w.cat} • ${w.dist}</span></div><p>⭐ ${w.rate} | ${w.exp} | 📍 ${w.dist}</p><div class="btns"><button class="call" onclick="location.href='tel:${w.phone}'">📞 Call</button><button class="wa" onclick="window.open('https://wa.me/${w.phone}?text=Namaste ${w.name} ji, Rojgar Sahayak se kaam hai','_blank')">WhatsApp</button></div></div>`;
+});
+document.getElementById('list').innerHTML= html || '<p style="text-align:center;padding:30px">Koi worker nahi mila</p>';
+}
+function addWorker(){
+let n=document.getElementById('f_name').value, p=document.getElementById('f_phone').value;
+if(!n||!p){alert('Naam aur Phone bharo');return;}
+workers.unshift({name:n,phone:p,dist:document.getElementById('f_dist').value,cat:document.getElementById('f_cat').value,exp:document.getElementById('f_exp').value||'Naya',rate:'5.0'});
+localStorage.setItem('rs_workers',JSON.stringify(workers));
+document.getElementById('formDiv').style.display='none';
+render();
+}
+render();
+if('serviceWorker' in navigator){navigator.serviceWorker.register('data:text/javascript;base64,'+btoa("self.addEventListener('fetch',e=>{})"));}
+</script>
+</body>
+</html>

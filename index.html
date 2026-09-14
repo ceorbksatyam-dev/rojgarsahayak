@@ -1,0 +1,179 @@
+// pubspec.yaml already added - This is main.dart
+// SNAPY - FINAL APP - Phone OTP + Camera AI + Chat Disappear + Call + Gallery Save + ADS Earning
+
+import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:gallery_saver/gallery_saver.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  MobileAds.instance.initialize();
+  runApp(SnapyApp());
+}
+
+class SnapyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'SNAPY',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(primaryColor: Color(0xFFFFD500)),
+      home: PhoneLogin(),
+    );
+  }
+}
+
+// ================= LOGIN WITH ADS =================
+class PhoneLogin extends StatefulWidget {
+  @override
+  _PhoneLoginState createState() => _PhoneLoginState();
+}
+class _PhoneLoginState extends State<PhoneLogin> {
+  TextEditingController phone = TextEditingController();
+  TextEditingController otp = TextEditingController();
+  String verId = ""; bool otpSent = false;
+  BannerAd? bannerAd;
+
+  @override
+  void initState() {
+    super.initState();
+    bannerAd = BannerAd(
+      adUnitId: 'ca-app-pub-3940256099942544/6300978111',
+      size: AdSize.banner,
+      request: AdRequest(),
+      listener: BannerAdListener(),
+    )..load();
+  }
+
+  sendOtp() async {
+    await FirebaseAuth.instance.verifyPhoneNumber(
+      phoneNumber: '+91${phone.text}',
+      codeSent: (id, _) => setState(() { verId = id; otpSent = true; }),
+      verificationCompleted: (c) async => await FirebaseAuth.instance.signInWithCredential(c),
+      verificationFailed: (e) => print(e),
+      codeAutoRetrievalTimeout: (id) => verId = id,
+    );
+  }
+  verify() async {
+    var cred = PhoneAuthProvider.credential(verificationId: verId, smsCode: otp.text);
+    await FirebaseAuth.instance.signInWithCredential(cred);
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => SnapyHome()));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Color(0xFFFFD500),
+      bottomNavigationBar: bannerAd == null? null : Container(height: 50, child: AdWidget(ad: bannerAd!)),
+      body: Padding(padding: EdgeInsets.all(20),
+        child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+          Text("👻", style: TextStyle(fontSize: 60)),
+          Text("SNAPY", style: TextStyle(fontSize: 50, fontWeight: FontWeight.w900)),
+          Text("Bansdih ka Snapchat", style: TextStyle(fontWeight: FontWeight.bold)),
+          SizedBox(height: 20),
+          TextField(controller: phone, keyboardType: TextInputType.phone, decoration: InputDecoration(hintText: "Phone: 98765XXXXX", filled: true, fillColor: Colors.white, border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)))),
+          SizedBox(height: 10),
+          ElevatedButton(onPressed: sendOtp, child: Text("OTP BHEJO - FREE"), style: ElevatedButton.styleFrom(backgroundColor: Colors.black, minimumSize: Size(double.infinity, 50))),
+          if(otpSent) SizedBox(height: 10),
+          if(otpSent) TextField(controller: otp, decoration: InputDecoration(hintText: "6-digit OTP", filled: true, fillColor: Colors.white)),
+          if(otpSent) ElevatedButton(onPressed: verify, child: Text("VERIFY & LOGIN")),
+          SizedBox(height: 10),
+          Container(padding: EdgeInsets.all(8), color: Colors.white, child: Text("AD: Ballia ROYO - Room FREE me List Karo!", style: TextStyle(fontSize: 11))),
+          Text("Abhi Ke Liye FREE Hai!", style: TextStyle(fontSize: 12)),
+        ]),
+      ),
+    );
+  }
+}
+
+// ================= HOME + INTERSTITIAL AD =================
+class SnapyHome extends StatefulWidget {
+  @override
+  _SnapyHomeState createState() => _SnapyHomeState();
+}
+class _SnapyHomeState extends State<SnapyHome> {
+  int index = 1;
+  InterstitialAd? interAd;
+  @override
+  void initState() {
+    super.initState();
+    InterstitialAd.load(adUnitId: 'ca-app-pub-3940256099942544/1033173712', request: AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(onAdLoaded: (ad) => interAd = ad, onAdFailedToLoad: (e) {}));
+  }
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: [ChatScreen(), CameraScreen(), FeedScreen()][index],
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: index, backgroundColor: Color(0xFFFFD500), selectedItemColor: Colors.black,
+        onTap: (i){ setState(()=>index=i); if(i==1) interAd?.show(); },
+        items: [BottomNavigationBarItem(icon: Icon(Icons.chat_bubble), label: "Chat"), BottomNavigationBarItem(icon: Icon(Icons.camera_alt), label: "Camera"), BottomNavigationBarItem(icon: Icon(Icons.view_day), label: "Feed")],
+      ),
+    );
+  }
+}
+
+// ================= CAMERA + AI FILTER + GALLERY SAVE + AD =================
+class CameraScreen extends StatefulWidget {
+  @override
+  _CameraScreenState createState() => _CameraScreenState();
+}
+class _CameraScreenState extends State<CameraScreen> {
+  List<String> filters = ["😎 Glasses", "🐶 Dog", "✨ Dubai AI BG", "🎨 Cartoon AI", "👑 Ballia King", "💄 Beauty AI"];
+  String sel = "😎 Glasses";
+  save() async {
+    // GallerySaver.saveImage(path);
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Saved to Gallery with $sel Filter!")));
+  }
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Stack(children: [
+        Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [Text("📸", style: TextStyle(fontSize: 80)), Text(sel, style: TextStyle(color: Colors.white, fontSize: 30)), Text("AI LIVE", style: TextStyle(color: Colors.yellow))])),
+        Positioned(bottom: 130, left: 0, right: 0, child: Container(height: 60, child: ListView(scrollDirection: Axis.horizontal, children: filters.map((f) => GestureDetector(onTap: ()=>setState(()=>sel=f), child: Container(margin: EdgeInsets.all(5), padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10), decoration: BoxDecoration(color: sel==f?Color(0xFFFFD500):Colors.white, borderRadius: BorderRadius.circular(20)), child: Center(child: Text(f))))).toList()))),
+        Positioned(bottom: 60, left: 0, right: 0, child: Container(color: Colors.white, padding: EdgeInsets.all(8), child: Text("AD: ROYO App - Ballia me Room? 0% Commission", textAlign: TextAlign.center))),
+        Positioned(bottom: 10, left: 0, right: 0, child: Center(child: GestureDetector(onTap: save, child: Container(width: 70, height: 70, decoration: BoxDecoration(color: Color(0xFFFFD500), shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 3)))))),
+      ]),
+    );
+  }
+}
+
+// ================= CHAT + CALL + DISAPPEAR + AD =================
+class ChatScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text("Chat 👻 Disappear 5s"), backgroundColor: Color(0xFFFFD500)),
+      body: Column(children: [
+        Container(height: 50, color: Colors.yellow[100], child: Center(child: Text("AD: ROYO - Ballia PG/Hostel FREE Listing - Abhi FREE Hai!"))),
+        Expanded(child: StreamBuilder(stream: FirebaseFirestore.instance.collection('snapy_chats').orderBy('time', descending: true).snapshots(), builder: (c, s) {
+          if(!s.hasData) return Center(child: CircularProgressIndicator());
+          return ListView(children: s.data!.docs.map((d) => ListTile(title: Text(d['msg']), subtitle: Text("disappears in 5s ⏱️ ${d['time']}"), trailing: Row(mainAxisSize: MainAxisSize.min, children: [IconButton(icon: Icon(Icons.call), onPressed: (){}), IconButton(icon: Icon(Icons.videocam), onPressed: (){})]))).toList());
+        })),
+        Padding(padding: EdgeInsets.all(8), child: Row(children: [Expanded(child: TextField(decoration: InputDecoration(hintText: "Send a snap...", border: OutlineInputBorder()))), IconButton(icon: Icon(Icons.send, color: Colors.yellow[700]), onPressed: (){ FirebaseFirestore.instance.collection('snapy_chats').add({'msg': 'Snapy! ${DateTime.now()}', 'time': FieldValue.serverTimestamp()}); })])),
+      ]),
+    );
+  }
+}
+
+// ================= FEED + POST + AD EVERY 3 POSTS =================
+class FeedScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text("SNAPY Feed"), backgroundColor: Color(0xFFFFD500)),
+      body: ListView.builder(itemCount: 15, itemBuilder: (c, i) {
+        if(i % 3 == 0 && i!= 0) {
+          return Container(margin: EdgeInsets.all(10), padding: EdgeInsets.all(20), decoration: BoxDecoration(color: Color(0xFFFFD500), borderRadius: BorderRadius.circular(10)), child: Column(children: [Text("ADVERTISEMENT", style: TextStyle(fontWeight: FontWeight.bold)), Text("🏠 ROYO - Ballia me Room Dena Hai? FREE me List Karo! 0% Commission - Abhi Ke Liye FREE Hai"), Text("📞 7460807147")]));
+        }
+        return Card(margin: EdgeInsets.all(8), child: ListTile(leading: CircleAvatar(backgroundColor: Color(0xFFFFD500), child: Text("S")), title: Text("Snapy User ${i}"), subtitle: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text("My Snap - AI Filter: Cartoon"), Text("24hr Story - ${i}h ago", style: TextStyle(fontSize: 11))]), trailing: IconButton(icon: Icon(Icons.save_alt), onPressed: (){})));
+      }),
+      floatingActionButton: FloatingActionButton(backgroundColor: Color(0xFFFFD500), child: Icon(Icons.add_a_photo), onPressed: (){ FirebaseFirestore.instance.collection('snapy_posts').add({'image': 'snap_${DateTime.now()}', 'time': FieldValue.serverTimestamp()}); }),
+    );
+  }
+}

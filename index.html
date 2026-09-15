@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>ROYO</title><script src="https://cdn.tailwindcss.com"></script><style>body{background:#0a0e1a}.bg-cyan{background:#22d3ee}.card{background:#151b2c; border:1px solid #1e293b}.otp-box{width:55px; height:55px; background:#151b2c; border:1.5px solid #22d3ee; border-radius:10px; text-align:center; font-size:22px; font-weight:bold; color:white}</style></head>
+<body class="text-white max-w-md mx-auto min-h-screen">
+
+<div id="s0" class="p-6 min-h-screen flex flex-col justify-center">
+<h1 class="text-3xl font-bold">ROYO 🏨</h1><p id="authTitle" class="mt-2 text-slate-400">Create Account</p>
+<div id="nameBox"><input id="userName" placeholder="Satyam" class="w-full p-4 rounded-xl mt-6 bg-white text-black"></div>
+<input id="userPhone" placeholder="+919795816732" class="w-full p-4 rounded-xl mt-3 bg-white text-black">
+<button onclick="getOTP()" class="bg-cyan text-black font-bold p-4 rounded-xl w-full mt-4">Sign Up - Get OTP</button>
+<p class="text-center mt-4 text-sm">Already account? <span onclick="toggleAuth()" class="text-cyan font-bold">Login</span></p>
+<p id="msg" class="text-yellow-400 text-xs mt-2 text-center"></p>
+</div>
+
+<div id="s1" class="hidden p-6 min-h-screen flex flex-col justify-center">
+<h1 class="text-3xl font-bold">ROYO</h1><h2 class="text-3xl font-bold mt-12">Verify Your Number</h2><p class="text-slate-400 mt-3" id="showPhoneText"></p>
+<div class="flex gap-3 mt-8 justify-center"><input class="otp-box" value="7"><input class="otp-box" value="3"><input class="otp-box" value="9"><input class="otp-box" value="2"></div>
+<p class="text-center text-cyan text-sm mt-4">Resend OTP in 00:28</p>
+<button onclick="go(2)" class="bg-cyan text-black font-bold p-4 rounded-full w-full mt-8">Verify & Continue</button>
+<p onclick="go(0)" class="text-center mt-4 underline text-sm">Change number?</p>
+</div>
+
+<div id="s2" class="hidden min-h-screen pb-20">
+<div class="p-4 flex justify-between"><h1 class="text-xl font-bold">ROYO</h1><span onclick="go(4)" class="bg-cyan text-black px-3 py-1 rounded-full text-xs font-bold">+ Owner</span></div>
+<div class="px-4"><div class="bg-[#151b2c] flex items-center gap-2 p-3 rounded-xl"><span>🔍</span><input id="search" onkeyup="render()" placeholder="Search location" class="bg-transparent border-0 w-full outline-none"></div></div>
+<div class="flex gap-2 px-4 mt-3 overflow-auto"><button id="f-all" onclick="setType('all')" class="bg-cyan text-black px-4 py-1.5 rounded-full text-xs font-bold">ALL</button><button id="f-Room" onclick="setType('Room')" class="filter bg-[#151b2c] px-4 py-1.5 rounded-full text-xs">ROOM</button><button id="f-PG" onclick="setType('PG')" class="filter bg-[#151b2c] px-4 py-1.5 rounded-full text-xs">PG</button><button id="f-Hostel" onclick="setType('Hostel')" class="filter bg-[#151b2c] px-4 py-1.5 rounded-full text-xs">HOSTEL</button><button id="f-Flat" onclick="setType('Flat')" class="filter bg-[#151b2c] px-4 py-1.5 rounded-full text-xs">FLAT</button></div>
+<div id="list" class="px-4 mt-4 space-y-4"></div>
+</div>
+
+<div id="s3" class="hidden min-h-screen"><div class="relative"><img id="d-img" class="h-72 w-full object-cover"><button onclick="go(2)" class="absolute top-4 left-4 bg-black/50 w-8 h-8 rounded-full">←</button></div><div class="p-4"><h2 id="d-title" class="text-xl font-bold"></h2><p id="d-price" class="text-cyan font-bold mt-2"></p><button class="bg-[#151b2c] p-4 rounded-full w-full mt-4">📞 Contact Owner</button><button onclick="goBook()" class="bg-cyan text-black font-bold p-4 rounded-full w-full mt-3">Book Now</button></div></div>
+
+<div id="s5" class="hidden p-5 min-h-screen"><button onclick="go(3)" class="mb-4">← Back</button><h2 class="text-2xl font-bold">Confirm Booking</h2><div class="card p-4 rounded-2xl mt-4"><h3 id="b-title" class="font-bold"></h3><p id="b-loc" class="text-xs text-slate-400"></p><div class="grid grid-cols-2 gap-3 mt-4"><div><label class="text-xs">Check-in</label><input type="date" class="w-full p-2 rounded-lg mt-1 bg-[#0f172a] border"></div><div><label class="text-xs">Check-out</label><input type="date" class="w-full p-2 rounded-lg mt-1 bg-[#0f172a] border"></div></div><div class="flex justify-between mt-4"><span>Rent</span><span id="b-price"></span></div><div class="flex justify-between"><span>Fee</span><span>₹199</span></div><div class="flex justify-between font-bold text-cyan mt-2 border-t border-slate-700 pt-2"><span>Total</span><span id="b-total"></span></div><button onclick="alert('Booking Confirmed!'); go(2)" class="bg-cyan text-black font-bold p-4 rounded-full w-full mt-6">Pay & Book</button></div></div>
+
+<div id="s4" class="hidden p-5 min-h-screen"><h2 class="text-2xl font-bold">Post Property</h2><select id="p-type" class="w-full p-3 rounded-xl mt-4 bg-[#151b2c]"><option>Room</option><option>PG</option><option>Hostel</option><option>Flat</option></select><input id="p-title" placeholder="Title e.g. 1BHK Kakadeo" class="w-full p-3 rounded-xl mt-3"><input id="p-loc" placeholder="Location" class="w-full p-3 rounded-xl mt-3"><input id="p-price" type="number" placeholder="4500" class="w-full p-3 rounded-xl mt-3"><div class="grid grid-cols-2 gap-3 mt-3"><label class="card p-6 rounded-xl text-center text-xs border-dashed border-cyan">+ Front<input type="file" class="hidden" onchange="loadImg(event,'img1')"><img id="img1" class="hidden mt-2 rounded"></label><label class="card p-6 rounded-xl text-center text-xs border-dashed border-cyan">+ Inside<input type="file" class="hidden" onchange="loadImg(event,'img2')"><img id="img2" class="hidden mt-2 rounded"></label></div><button onclick="postProp()" class="bg-cyan text-black font-bold p-4 rounded-full w-full mt-6">Post Property</button><button onclick="go(2)" class="w-full mt-3 text-sm">← Back</button></div>
+
+<script>
+let isLogin=false; function toggleAuth(){ isLogin=!isLogin; document.getElementById('authTitle').innerText=isLogin?'Login':'Create Account'; document.getElementById('nameBox').style.display=isLogin?'none':'block';}
+function getOTP(){ let ph=document.getElementById('userPhone').value; if(ph.length<10){document.getElementById('msg').innerText='Number sahi dalo'; return;} document.getElementById('showPhoneText').innerText='OTP sent to '+ph; go(1); }
+let props=[{type:'Room',title:'Single Room in Kakadeo',loc:'Furnished',price:3500,img:'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267'},{type:'PG',title:'PG for Students',loc:'Kidwai Nagar',price:4500,img:'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=600'},{type:'Flat',title:'2 BHK Apartment',loc:'Koramangala',price:24000,img:'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=600'},{type:'Hostel',title:'3 BHK Villa',loc:'HSR Layout',price:42000,img:'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=600'}];
+let cur='all'; let curProp=null;
+function render(){ let q=document.getElementById('search')?.value.toLowerCase()||''; let h=''; props.forEach((p,i)=>{ if(cur!='all'&&p.type!=cur) return; if(q&&!p.title.toLowerCase().includes(q)) return; h+=`<div onclick="openD(${i})" class="card rounded-2xl overflow-hidden"><img src="${p.img}" class="h-44 w-full object-cover"><div class="p-3"><span class="bg-cyan text-black text-[10px] px-2 py-1 rounded font-bold">${p.type}</span><h3 class="font-bold mt-1">${p.title}</h3><p class="text-xs text-slate-400">${p.loc}</p><p class="text-cyan font-bold mt-1">₹${p.price} / month</p></div></div>`}); document.getElementById('list').innerHTML=h;}
+function setType(t){cur=t; document.querySelectorAll('.filter').forEach(b=>b.className='filter bg-[#151b2c] px-4 py-1.5 rounded-full text-xs'); document.getElementById('f-'+t).className='bg-cyan text-black px-4 py-1.5 rounded-full text-xs font-bold'; render();}
+function openD(i){ let p=props[i]; curProp=p; document.getElementById('d-img').src=p.img; document.getElementById('d-title').innerText=p.title; document.getElementById('d-price').innerText='₹'+p.price+' / month'; go(3);}
+function goBook(){ document.getElementById('b-title').innerText=curProp.title; document.getElementById('b-loc').innerText=curProp.loc; document.getElementById('b-price').innerText='₹'+curProp.price; document.getElementById('b-total').innerText='₹'+(parseInt(curProp.price)+199); go(5); }
+function go(n){ [0,1,2,3,4,5].forEach(x=>{let e=document.getElementById('s'+x); if(e) e.classList.add('hidden')}); document.getElementById('s'+n).classList.remove('hidden'); if(n==2) render();}
+function loadImg(e,id){ let im=document.getElementById(id); im.src=URL.createObjectURL(e.target.files[0]); im.classList.remove('hidden');}
+function postProp(){ let t=document.getElementById('p-title').value, pr=document.getElementById('p-price').value, ty=document.getElementById('p-type').value, lo=document.getElementById('p-loc').value; if(!t||!pr){alert('Title Price bharo'); return;} props.unshift({type:ty,title:t,loc:lo,price:pr,img:document.getElementById('img1').src||'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267'}); go(2);}
+</script>
+</body></html>

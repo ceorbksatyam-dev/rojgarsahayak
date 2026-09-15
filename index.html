@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ROYO - Real OTP Login</title>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<style>
+body{font-family: sans-serif; background:#0f172a; color:white; display:flex; justify-content:center; align-items:center; height:100vh; margin:0;}
+.card{background:#1e293b; padding:25px; border-radius:15px; width:320px; box-shadow:0 10px 30px rgba(0,0,0,0.5);}
+input{width:100%; padding:12px; margin:10px 0; border-radius:8px; border:none; outline:none; font-size:16px;}
+button{width:100%; padding:12px; background:#38bdf8; border:none; border-radius:8px; font-weight:bold; font-size:16px; cursor:pointer;}
+#recaptcha-container{margin:10px 0;}
+.hidden{display:none;}
+</style>
+</head>
+<body>
+
+<div class="card">
+<h2>ROYO 🏨 Login</h2>
+<p>Physics Wallah jaisa Real OTP</p>
+
+<div id="phoneDiv">
+<input type="text" id="phoneNumber" placeholder="+91 9876543210" value="+91">
+<div id="recaptcha-container"></div>
+<button onclick="sendOTP()">Send OTP</button>
+</div>
+
+<div id="otpDiv" class="hidden">
+<input type="text" id="otp" placeholder="6 Digit OTP Enter karo">
+<button onclick="verifyOTP()">Verify OTP</button>
+<p id="status"></p>
+</div>
+
+<p id="message"></p>
+</div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyAzOLv_Y_rbeLn7S94IviUavKgZxQbqMAg",
+  authDomain: "royo-59dac.firebaseapp.com",
+  projectId: "royo-59dac",
+  storageBucket: "royo-59dac.firebasestorage.app",
+  messagingSenderId: "139395940658",
+  appId: "1:139395940658:web:e71b0e803272f4ed10d72b",
+  measurementId: "G-BRNCMNQ4FW"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+
+window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+  'size': 'normal'
+});
+
+let confirmationResult;
+
+function sendOTP(){
+  const phone = document.getElementById('phoneNumber').value;
+  document.getElementById('message').innerText = "OTP bhej rahe hai...";
+  
+  auth.signInWithPhoneNumber(phone, window.recaptchaVerifier)
+    .then((result) => {
+      confirmationResult = result;
+      document.getElementById('phoneDiv').classList.add('hidden');
+      document.getElementById('otpDiv').classList.remove('hidden');
+      document.getElementById('message').innerText = "OTP bhej diya! Mobile check karo";
+    }).catch((error) => {
+      document.getElementById('message').innerText = error.message;
+      window.recaptchaVerifier.render().then(w=>grecaptcha.reset(w));
+    });
+}
+
+function verifyOTP(){
+  const code = document.getElementById('otp').value;
+  confirmationResult.confirm(code).then((result) => {
+    document.getElementById('status').innerText = "Login Success! Welcome to ROYO";
+    // Yaha apne rooms wale page pe redirect kar do
+    // window.location.href = "rooms.html";
+    alert("ROYO me Swagat hai! Login ho gaya!");
+  }).catch((error) => {
+    document.getElementById('status').innerText = "Galat OTP: " + error.message;
+  });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ROYO - Room On Your Own</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+body{background:#0a0e1a; font-family: 'Inter', sans-serif;}
+.cyan{color:#22d3ee}.bg-cyan{background:#22d3ee}
+.card{background:#151b2c; border:1px solid #1e293b}
+input, textarea{background:#0f172a; border:1px solid #1e293b}
+.otp-box{width:55px; height:55px; background:#151b2c; border:1.5px solid #22d3ee; border-radius:10px; text-align:center; font-size:22px; font-weight:bold; color:white}
+</style>
+</head>
+<body class="text-white max-w-md mx-auto min-h-screen">
+
+<!-- SCREEN 1: LOGIN OTP -->
+<div id="s1" class="p-6 min-h-screen flex flex-col justify-center">
+  <h1 class="text-3xl font-bold flex items-center gap-2"><span class="bg-cyan text-black w-9 h-9 flex items-center justify-center rounded-full">⌂</span>ROYO</h1>
+  <h2 class="text-3xl font-bold mt-12">Verify Your Number</h2>
+  <p class="text-slate-400 mt-3">We have sent a 6-digit OTP to<br>+91 98****1234</p>
+  <div class="flex gap-3 mt-8 justify-center">
+    <input class="otp-box" value="7"><input class="otp-box" value="3"><input class="otp-box" value="9"><input class="otp-box" value="2">
+  </div>
+  <p class="text-center text-cyan text-sm mt-4">Resend OTP in 00:28</p>
+  <button onclick="go(2)" class="bg-cyan text-black font-bold p-4 rounded-full w-full mt-8">Verify & Continue</button>
+  <p class="text-center mt-4 underline text-sm">Change number?</p>
+</div>
+
+<!-- SCREEN 2: HOME -->
+<div id="s2" class="hidden min-h-screen pb-20">
+  <div class="p-4 flex justify-between items-center">
+    <h1 class="text-xl font-bold flex items-center gap-2"><span class="bg-cyan text-black w-7 h-7 flex items-center justify-center rounded-full text-sm">⌂</span>ROYO</h1>
+    <div class="flex gap-3"><span>🔔</span><span class="w-7 h-7 bg-slate-600 rounded-full"></span></div>
+  </div>
+  <div class="px-4">
+    <div class="bg-[#151b2c] flex items-center gap-2 p-3 rounded-xl"><span>🔍</span><input id="search" onkeyup="filterBy()" placeholder="Search location, property, locality" class="bg-transparent border-0 w-full outline-none"></div>
+  </div>
+  <div class="flex justify-between items-center px-4 mt-5">
+    <h3 class="font-bold">Nearby Properties</h3><span class="text-cyan text-sm">See all ></span>
+  </div>
+  <!-- FILTERS: ROOM, PG, HOSTEL, FLAT -->
+  <div class="flex gap-2 px-4 mt-3 overflow-auto">
+    <button onclick="setType('all')" id="f-all" class="filter bg-cyan text-black px-4 py-1.5 rounded-full text-xs font-bold">ALL</button>
+    <button onclick="setType('Room')" id="f-Room" class="filter bg-[#151b2c] px-4 py-1.5 rounded-full text-xs">ROOM</button>
+    <button onclick="setType('PG')" id="f-PG" class="filter bg-[#151b2c] px-4 py-1.5 rounded-full text-xs">PG</button>
+    <button onclick="setType('Hostel')" id="f-Hostel" class="filter bg-[#151b2c] px-4 py-1.5 rounded-full text-xs">HOSTEL</button>
+    <button onclick="setType('Flat')" id="f-Flat" class="filter bg-[#151b2c] px-4 py-1.5 rounded-full text-xs">FLAT</button>
+  </div>
+  <div id="list" class="px-4 mt-4 space-y-4"></div>
+  <div class="fixed bottom-0 max-w-md w-full bg-[#151b2c] flex justify-around p-3 border-t border-slate-800">
+    <span class="text-cyan">⌂ Home</span><span>⌕ Search</span><span>★ Fav</span><span onclick="go(4)">👤 Owner</span>
+  </div>
+</div>
+
+<!-- SCREEN 3: DETAIL -->
+<div id="s3" class="hidden min-h-screen">
+  <div class="relative">
+    <img id="d-img" src="" class="h-72 w-full object-cover"><button onclick="go(2)" class="absolute top-4 left-4 bg-black/50 w-8 h-8 rounded-full">←</button>
+  </div>
+  <div class="p-4">
+    <h2 id="d-title" class="text-xl font-bold"></h2>
+    <div class="flex gap-2 mt-3 text-xs"><span class="card px-3 py-1 rounded-full" id="d-type">2 BHK</span><span class="card px-3 py-1 rounded-full">950 sqft</span><span class="card px-3 py-1 rounded-full">Furnished</span></div>
+    <p class="text-cyan font-bold text-lg mt-3" id="d-price">₹24,000 / month</p>
+    <h3 class="font-bold mt-4">About this property</h3><p class="text-slate-400 text-sm mt-1">Spacious property with balcony, modular kitchen, 24x7 water, secure parking. Owner verified.</p>
+    <div class="flex items-center gap-3 mt-4"><div class="w-8 h-8 bg-cyan text-black rounded-full flex items-center justify-center font-bold">RK</div><div><p class="text-sm">Rahul Kumar • Owner • Verified</p><p class="text-xs text-slate-400">Listed 2 days ago</p></div></div>
+    <button class="bg-cyan text-black font-bold p-4 rounded-full w-full mt-6">📞 Contact Owner</button>
+  </div>
+</div>
+
+<!-- SCREEN 4: OWNER PANEL -->
+<div id="s4" class="hidden p-5 min-h-screen">
+  <h2 class="text-2xl font-bold">Post Property</h2><p class="text-slate-400 text-sm">Add your property for rent</p>
+  <label class="block mt-5 text-sm">Property Type</label>
+  <select id="p-type" class="w-full p-3 rounded-xl mt-1"><option>Room</option><option>PG</option><option>Hostel</option><option>Flat</option></select>
+  <label class="block mt-4 text-sm">Property Title</label><input id="p-title" placeholder="e.g. 1BHK in Kakadeo" class="w-full p-3 rounded-xl mt-1">
+  <label class="block mt-4 text-sm">Location</label><input id="p-loc" placeholder="e.g. Swaroop Nagar, Kanpur" class="w-full p-3 rounded-xl mt-1">
+  <label class="block mt-4 text-sm">Price per month (₹)</label><input id="p-price" type="number" placeholder="4500" class="w-full p-3 rounded-xl mt-1">
+  <label class="block mt-4 text-sm">Photos</label>
+  <div class="grid grid-cols-2 gap-3 mt-2">
+    <label class="card border-dashed border-cyan p-6 rounded-xl text-center text-xs">+ Add Photo<br>Front view<input type="file" class="hidden" accept="image/*" onchange="loadImg(event,'img1')"><img id="img1" class="hidden mt-2 rounded-lg h-20 w-full object-cover"></label>
+    <label class="card border-dashed border-cyan p-6 rounded-xl text-center text-xs">+ Add Photo<br>Interior view<input type="file" class="hidden" accept="image/*" onchange="loadImg(event,'img2')"><img id="img2" class="hidden mt-2 rounded-lg h-20 w-full object-cover"></label>
+  </div>
+  <div class="flex justify-between items-center mt-6"><span>Available now</span><div class="w-12 h-7 bg-cyan rounded-full p-1"><div class="w-5 h-5 bg-white rounded-full ml-auto"></div></div></div>
+  <button onclick="postProp()" class="bg-cyan text-black font-bold p-4 rounded-full w-full mt-6">Post Property</button>
+  <button onclick="go(2)" class="w-full text-center mt-3 text-sm">← Back to Home</button>
+</div>
+
+<script>
+let props = [
+  {type:'Room', title:'Single Room in Kakadeo', loc:'1.2 km away • Furnished', price:3500, img:'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267'},
+  {type:'PG', title:'PG for Students', loc:'Kidwai Nagar • Food Included', price:4500, img:'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=600'},
+  {type:'Flat', title:'2 BHK Apartment, Koramangala', loc:'2.5 km away • Semi-furnished', price:24000, img:'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=600'},
+  {type:'Hostel', title:'3 BHK Villa • HSR Layout', loc:'Near CSJM • 950 sqft', price:42000, img:'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=600'},
+];
+let curType='all';
+function render(){
+  let html=''; let q=document.getElementById('search')?.value.toLowerCase()||'';
+  props.forEach((p,i)=>{
+    if(curType!='all' && p.type!=curType) return;
+    if(q &&!p.title.toLowerCase().includes(q) &&!p.loc.toLowerCase().includes(q)) return;
+    html+=`<div onclick="openDetail(${i})" class="card rounded-2xl overflow-hidden"><img src="${p.img}" class="h-44 w-full object-cover"><div class="p-3"><span class="bg-cyan text-black text-[10px] px-2 py-1 rounded font-bold">${p.type.toUpperCase()}</span><h3 class="font-bold mt-1">${p.title}</h3><p class="text-xs text-slate-400">${p.loc}</p><p class="text-cyan font-bold mt-1">₹${p.price} / month</p></div></div>`;
+  });
+  document.getElementById('list').innerHTML=html||'<p class="text-center text-slate-400">No property</p>';
+}
+function setType(t){
+  curType=t; document.querySelectorAll('.filter').forEach(b=>b.className='filter bg-[#151b2c] px-4 py-1.5 rounded-full text-xs');
+  document.getElementById('f-'+t).className='filter bg-cyan text-black px-4 py-1.5 rounded-full text-xs font-bold'; render();
+}
+function filterBy(){ render(); }
+function openDetail(i){
+  let p=props[i]; document.getElementById('d-img').src=p.img; document.getElementById('d-title').innerText=p.title; document.getElementById('d-type').innerText=p.type; document.getElementById('d-price').innerText='₹'+p.price+' / month'; go(3);
+}
+function go(n){
+  [1,2,3,4].forEach(x=>document.getElementById('s'+x).classList.add('hidden'));
+  document.getElementById('s'+n).classList.remove('hidden');
+  if(n==2) render();
+}
+function loadImg(e,id){ let img=document.getElementById(id); img.src=URL.createObjectURL(e.target.files[0]); img.classList.remove('hidden'); img.dataset.ok=1; }
+function postProp(){
+  let title=document.getElementById('p-title').value, loc=document.getElementById('p-loc').value, price=document.getElementById('p-price').value, type=document.getElementById('p-type').value;
+  if(!title||!price){ alert('Title aur Price bhar'); return; }
+  props.unshift({type:type, title:title, loc:loc, price:price, img: document.getElementById('img1').src || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267'});
+  alert('Property Posted! Home pe dekho'); go(2);
+}
+render();
+</script>
+</body>
+</html>
